@@ -1,0 +1,8 @@
+---
+description: Defines the approach in which the API code is structured.
+alwaysApply: true
+---
+
+Each GraphQL query must live in its own file.
+Networking and transforming code must be in separate files to separate the concerns.
+GraphQL types must not be typed manually but rather fetched from a source of truth.

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import QueryProvider from '@/components/QueryProvider'
 
 export const metadata: Metadata = {
   title: 'PR Metrics',
@@ -268,7 +269,9 @@ export default function RootLayout({
           }
         `}} />
       </head>
-      <body>{children}</body>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   )
 }

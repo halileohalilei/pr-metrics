@@ -1,0 +1,7 @@
+---
+description: Defines the general approach to how the agent should behave.
+alwaysApply: true
+---
+
+Always tidy up if things get too messy and convoluted.
+Never leave unused code around.
