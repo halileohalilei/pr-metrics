@@ -3,6 +3,23 @@
 import { useState, FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import {
+  TextInput,
+  PasswordInput,
+  Button,
+  Group,
+  Stack,
+  Divider,
+  Text,
+  Loader,
+  Alert,
+  Card,
+  Grid,
+  Progress,
+  Title,
+  NumberInput,
+} from '@mantine/core'
+import { IconBrandGithub, IconCalendar, IconUsers, IconAlertCircle } from '@tabler/icons-react'
+import {
   createGitHubClient,
   fetchAllPullRequests,
   fetchTeamMembers,
@@ -116,180 +133,273 @@ export default function MetricsForm() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="org">Organization Name *</label>
-          <input type="text" id="org" name="org" required placeholder="e.g., facebook" />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="repo">Repository Name *</label>
-          <input type="text" id="repo" name="repo" required placeholder="e.g., react" />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="token">GitHub Token *</label>
-          <input
-            type="password"
-            id="token"
-            name="token"
+        <Stack gap="md">
+          <TextInput
+            label="Organization Name"
+            name="org"
+            placeholder="e.g., facebook"
             required
-            placeholder="Your GitHub personal access token"
+            leftSection={<IconBrandGithub size={16} />}
           />
-          <small>Token needs &apos;repo&apos; and &apos;read:org&apos; scopes</small>
-        </div>
 
-        <div className="form-group">
-          <label>Date Range</label>
-          <div className="date-range">
-            <div className="date-input-group">
-              <label htmlFor="startDate">From</label>
-              <input
+          <TextInput
+            label="Repository Name"
+            name="repo"
+            placeholder="e.g., react"
+            required
+            leftSection={<IconBrandGithub size={16} />}
+          />
+
+          <PasswordInput
+            label="GitHub Token"
+            name="token"
+            placeholder="Your GitHub personal access token"
+            required
+            description="Token needs 'repo' and 'read:org' scopes"
+          />
+
+          <div>
+            <Text size="sm" fw={500} mb="xs">
+              Date Range
+            </Text>
+            <Group grow align="flex-start" mb="xs">
+              <TextInput
+                label="From"
                 type="date"
-                id="startDate"
                 name="startDate"
                 value={startDate}
                 onChange={(e) => handleDateChange('start', e.target.value)}
+                leftSection={<IconCalendar size={16} />}
               />
-            </div>
-            <div className="date-input-group">
-              <label htmlFor="endDate">To</label>
-              <input
+              <TextInput
+                label="To"
                 type="date"
-                id="endDate"
                 name="endDate"
                 value={endDate}
                 onChange={(e) => handleDateChange('end', e.target.value)}
+                leftSection={<IconCalendar size={16} />}
               />
-            </div>
-          </div>
-          <div className="or-divider">OR</div>
-          <div className="days-input-group">
-            <label htmlFor="numDays">Number of Days (from today)</label>
-            <input
-              type="number"
-              id="numDays"
+            </Group>
+
+            <Divider label="OR" labelPosition="center" my="md" />
+
+            <NumberInput
+              label="Number of Days (from today)"
               name="numDays"
-              min="1"
               placeholder="e.g., 30"
+              min={1}
               value={numDays}
-              onChange={(e) => handleNumDaysChange(e.target.value)}
+              onChange={(value) => handleNumDaysChange(String(value))}
+              leftSection={<IconCalendar size={16} />}
             />
           </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="team">Team Name (optional)</label>
-          <input type="text" id="team" name="team" placeholder="e.g., frontend-team" />
-          <small>Filter reviewers by team name. Leave empty to show all reviewers.</small>
-        </div>
+          <TextInput
+            label="Team Name (optional)"
+            name="team"
+            placeholder="e.g., frontend-team"
+            description="Filter reviewers by team name. Leave empty to show all reviewers."
+            leftSection={<IconUsers size={16} />}
+          />
 
-        <button type="submit" className="submit-btn" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Fetching...' : 'See Metrics'}
-        </button>
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            loading={mutation.isPending}
+            gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+            variant="gradient"
+          >
+            See Metrics
+          </Button>
+        </Stack>
       </form>
 
       {mutation.isPending && (
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Fetching PR reviews via GraphQL...</p>
-        </div>
+        <Group justify="center" mt="xl">
+          <Stack align="center" gap="sm">
+            <Loader size="lg" type="bars" />
+            <Text c="dimmed">Fetching PR reviews via GraphQL...</Text>
+          </Stack>
+        </Group>
       )}
 
-      {error && <div className="error">{error}</div>}
+      {error && (
+        <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red" mt="md">
+          {error}
+        </Alert>
+      )}
 
       {mutation.isSuccess && mutation.data && (
-        <div className="results">
-          <h2>PR Review Metrics</h2>
-          <div>
-            <div className="summary-stats">
-              <div className="stat-item">
-                <div className="stat-value">{mutation.data.totalPRs}</div>
-                <div className="stat-label">Total PRs</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{mutation.data.openPRs}</div>
-                <div className="stat-label">Open</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{mutation.data.mergedPRs}</div>
-                <div className="stat-label">Merged</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{mutation.data.closedPRs}</div>
-                <div className="stat-label">Closed</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{mutation.data.totalReviews}</div>
-                <div className="stat-label">Total Reviews</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{mutation.data.totalComments}</div>
-                <div className="stat-label">Total Comments</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value">{mutation.data.reviewers.length}</div>
-                <div className="stat-label">
-                  Reviewers{mutation.data.teamFilter ? ' (Team)' : ''}
-                </div>
-              </div>
-            </div>
+        <Stack gap="xl" mt="xl">
+          <Title order={2} ta="center">PR Review Metrics</Title>
 
-            <div className="timing-stats">
-              <h3>⏱️ Review Timing</h3>
-              <div className="metric-row">
-                <span className="metric-label">Time to First Review (avg)</span>
-                <span className="metric-value">
+          <Card
+            shadow="sm"
+            p="lg"
+            radius="md"
+            withBorder
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            }}
+          >
+            <Grid gutter="md">
+              <Grid.Col span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                <Stack align="center" gap={4}>
+                  <Text size="xl" fw={700} c="white">
+                    {mutation.data.totalPRs}
+                  </Text>
+                  <Text size="sm" c="white" opacity={0.9}>
+                    Total PRs
+                  </Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                <Stack align="center" gap={4}>
+                  <Text size="xl" fw={700} c="white">
+                    {mutation.data.openPRs}
+                  </Text>
+                  <Text size="sm" c="white" opacity={0.9}>
+                    Open
+                  </Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                <Stack align="center" gap={4}>
+                  <Text size="xl" fw={700} c="white">
+                    {mutation.data.mergedPRs}
+                  </Text>
+                  <Text size="sm" c="white" opacity={0.9}>
+                    Merged
+                  </Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                <Stack align="center" gap={4}>
+                  <Text size="xl" fw={700} c="white">
+                    {mutation.data.closedPRs}
+                  </Text>
+                  <Text size="sm" c="white" opacity={0.9}>
+                    Closed
+                  </Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                <Stack align="center" gap={4}>
+                  <Text size="xl" fw={700} c="white">
+                    {mutation.data.totalReviews}
+                  </Text>
+                  <Text size="sm" c="white" opacity={0.9}>
+                    Total Reviews
+                  </Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                <Stack align="center" gap={4}>
+                  <Text size="xl" fw={700} c="white">
+                    {mutation.data.totalComments}
+                  </Text>
+                  <Text size="sm" c="white" opacity={0.9}>
+                    Total Comments
+                  </Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                <Stack align="center" gap={4}>
+                  <Text size="xl" fw={700} c="white">
+                    {mutation.data.reviewers.length}
+                  </Text>
+                  <Text size="sm" c="white" opacity={0.9}>
+                    Reviewers{mutation.data.teamFilter ? ' (Team)' : ''}
+                  </Text>
+                </Stack>
+              </Grid.Col>
+            </Grid>
+          </Card>
+
+          <Card shadow="sm" p="lg" radius="md" withBorder>
+            <Title order={3} size="h4" mb="md">
+              ⏱️ Review Timing
+            </Title>
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  Time to First Review (avg)
+                </Text>
+                <Text size="sm" fw={600}>
                   {formatHours(mutation.data.timing.timeToFirstReview.average)}
-                </span>
-              </div>
-              <div className="metric-row">
-                <span className="metric-label">Time to First Review (median)</span>
-                <span className="metric-value">
+                </Text>
+              </Group>
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  Time to First Review (median)
+                </Text>
+                <Text size="sm" fw={600}>
                   {formatHours(mutation.data.timing.timeToFirstReview.median)}
-                </span>
-              </div>
-              <div className="metric-row">
-                <span className="metric-label">Time to Merge (avg)</span>
-                <span className="metric-value">
+                </Text>
+              </Group>
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  Time to Merge (avg)
+                </Text>
+                <Text size="sm" fw={600}>
                   {formatHours(mutation.data.timing.timeToMerge.average)}
-                </span>
-              </div>
-              <div className="metric-row">
-                <span className="metric-label">Time to Merge (median)</span>
-                <span className="metric-value">
+                </Text>
+              </Group>
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  Time to Merge (median)
+                </Text>
+                <Text size="sm" fw={600}>
                   {formatHours(mutation.data.timing.timeToMerge.median)}
-                </span>
-              </div>
-            </div>
+                </Text>
+              </Group>
+            </Stack>
+          </Card>
 
-            <div className="distribution-stats">
-              <h3>📈 Review Distribution</h3>
-              <div className="metric-row">
-                <span className="metric-label">Reviews per PR (avg)</span>
-                <span className="metric-value">
+          <Card shadow="sm" p="lg" radius="md" withBorder>
+            <Title order={3} size="h4" mb="md">
+              📈 Review Distribution
+            </Title>
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  Reviews per PR (avg)
+                </Text>
+                <Text size="sm" fw={600}>
                   {mutation.data.distribution.reviewsPerPR.average.toFixed(1)}
-                </span>
-              </div>
-              <div className="metric-row">
-                <span className="metric-label">Reviews per PR (median)</span>
-                <span className="metric-value">
+                </Text>
+              </Group>
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  Reviews per PR (median)
+                </Text>
+                <Text size="sm" fw={600}>
                   {mutation.data.distribution.reviewsPerPR.median.toFixed(1)}
-                </span>
-              </div>
-              <div className="metric-row">
-                <span className="metric-label">Approvals before merge (avg)</span>
-                <span className="metric-value">
+                </Text>
+              </Group>
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  Approvals before merge (avg)
+                </Text>
+                <Text size="sm" fw={600}>
                   {mutation.data.distribution.approvalsBeforeMerge.average.toFixed(1)}
-                </span>
-              </div>
-            </div>
+                </Text>
+              </Group>
+            </Stack>
+          </Card>
 
-            <h3>👥 Reviewers</h3>
+          <Title order={3} size="h4" mt="md">
+            👥 Reviewers
+          </Title>
 
-            {mutation.data.reviewers.length === 0 ? (
-              <div className="no-results">No reviewers found in the specified criteria.</div>
-            ) : (
-              mutation.data.reviewers.map((reviewer) => {
+          {mutation.data.reviewers.length === 0 ? (
+            <Text ta="center" c="dimmed" py="xl">
+              No reviewers found in the specified criteria.
+            </Text>
+          ) : (
+            <Stack gap="md">
+              {mutation.data.reviewers.map((reviewer) => {
                 const approvedPct = (
                   (reviewer.approved / reviewer.totalReviews) *
                   100
@@ -312,92 +422,130 @@ export default function MetricsForm() {
                 ).toFixed(1)
 
                 return (
-                  <div key={reviewer.name} className="metric-card">
-                    <h3>{reviewer.name}</h3>
-                    <div className="metric-row">
-                      <span className="metric-label">Total Reviews</span>
-                      <span className="metric-value">{reviewer.totalReviews}</span>
-                    </div>
-                    <div className="metric-row">
-                      <span className="metric-label">Unique PRs Reviewed</span>
-                      <span className="metric-value">{reviewer.uniquePRs}</span>
-                    </div>
-                    <div className="metric-row">
-                      <span className="metric-label">Approved</span>
-                      <span className="metric-value">
-                        {reviewer.approved} ({approvedPct}%)
-                      </span>
-                    </div>
-                    <div className="percentage-bar">
-                      <div className="percentage-fill" style={{ width: `${approvedPct}%` }}>
-                        {parseFloat(approvedPct) > 10 ? `${approvedPct}%` : ''}
+                  <Card
+                    key={reviewer.name}
+                    shadow="sm"
+                    p="lg"
+                    radius="md"
+                    withBorder
+                    style={{ borderLeft: '4px solid var(--mantine-color-violet-6)' }}
+                  >
+                    <Title order={4} size="h5" mb="md">
+                      {reviewer.name}
+                    </Title>
+                    <Stack gap="sm">
+                      <Group justify="space-between">
+                        <Text size="sm" c="dimmed">
+                          Total Reviews
+                        </Text>
+                        <Text size="sm" fw={600}>
+                          {reviewer.totalReviews}
+                        </Text>
+                      </Group>
+                      <Group justify="space-between">
+                        <Text size="sm" c="dimmed">
+                          Unique PRs Reviewed
+                        </Text>
+                        <Text size="sm" fw={600}>
+                          {reviewer.uniquePRs}
+                        </Text>
+                      </Group>
+
+                      <div>
+                        <Group justify="space-between" mb={5}>
+                          <Text size="sm" c="dimmed">
+                            Approved
+                          </Text>
+                          <Text size="sm" fw={600}>
+                            {reviewer.approved} ({approvedPct}%)
+                          </Text>
+                        </Group>
+                        <Progress
+                          value={parseFloat(approvedPct)}
+                          size="lg"
+                          radius="xl"
+                          color="violet"
+                        />
                       </div>
-                    </div>
-                    <div className="metric-row">
-                      <span className="metric-label">Changes Requested</span>
-                      <span className="metric-value">
-                        {reviewer.changesRequested} ({changesRequestedPct}%)
-                      </span>
-                    </div>
-                    <div className="percentage-bar">
-                      <div
-                        className="percentage-fill"
-                        style={{ width: `${changesRequestedPct}%` }}
-                      >
-                        {parseFloat(changesRequestedPct) > 10 ? `${changesRequestedPct}%` : ''}
+
+                      <div>
+                        <Group justify="space-between" mb={5}>
+                          <Text size="sm" c="dimmed">
+                            Changes Requested
+                          </Text>
+                          <Text size="sm" fw={600}>
+                            {reviewer.changesRequested} ({changesRequestedPct}%)
+                          </Text>
+                        </Group>
+                        <Progress
+                          value={parseFloat(changesRequestedPct)}
+                          size="lg"
+                          radius="xl"
+                          color="violet"
+                        />
                       </div>
-                    </div>
-                    <div className="metric-row">
-                      <span className="metric-label">Commented</span>
-                      <span className="metric-value">
-                        {reviewer.commented} ({commentedPct}%)
-                      </span>
-                    </div>
-                    <div className="percentage-bar">
-                      <div className="percentage-fill" style={{ width: `${commentedPct}%` }}>
-                        {parseFloat(commentedPct) > 10 ? `${commentedPct}%` : ''}
+
+                      <div>
+                        <Group justify="space-between" mb={5}>
+                          <Text size="sm" c="dimmed">
+                            Commented
+                          </Text>
+                          <Text size="sm" fw={600}>
+                            {reviewer.commented} ({commentedPct}%)
+                          </Text>
+                        </Group>
+                        <Progress
+                          value={parseFloat(commentedPct)}
+                          size="lg"
+                          radius="xl"
+                          color="violet"
+                        />
                       </div>
-                    </div>
-                    {(reviewer.dismissed > 0 || reviewer.pending > 0) && (
-                      <>
-                        {reviewer.dismissed > 0 && (
-                          <>
-                            <div className="metric-row">
-                              <span className="metric-label">Dismissed</span>
-                              <span className="metric-value">
-                                {reviewer.dismissed} ({dismissedPct}%)
-                              </span>
-                            </div>
-                            <div className="percentage-bar">
-                              <div className="percentage-fill" style={{ width: `${dismissedPct}%` }}>
-                                {parseFloat(dismissedPct) > 10 ? `${dismissedPct}%` : ''}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                        {reviewer.pending > 0 && (
-                          <>
-                            <div className="metric-row">
-                              <span className="metric-label">Pending</span>
-                              <span className="metric-value">
-                                {reviewer.pending} ({pendingPct}%)
-                              </span>
-                            </div>
-                            <div className="percentage-bar">
-                              <div className="percentage-fill" style={{ width: `${pendingPct}%` }}>
-                                {parseFloat(pendingPct) > 10 ? `${pendingPct}%` : ''}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
+
+                      {reviewer.dismissed > 0 && (
+                        <div>
+                          <Group justify="space-between" mb={5}>
+                            <Text size="sm" c="dimmed">
+                              Dismissed
+                            </Text>
+                            <Text size="sm" fw={600}>
+                              {reviewer.dismissed} ({dismissedPct}%)
+                            </Text>
+                          </Group>
+                          <Progress
+                            value={parseFloat(dismissedPct)}
+                            size="lg"
+                            radius="xl"
+                            color="violet"
+                          />
+                        </div>
+                      )}
+
+                      {reviewer.pending > 0 && (
+                        <div>
+                          <Group justify="space-between" mb={5}>
+                            <Text size="sm" c="dimmed">
+                              Pending
+                            </Text>
+                            <Text size="sm" fw={600}>
+                              {reviewer.pending} ({pendingPct}%)
+                            </Text>
+                          </Group>
+                          <Progress
+                            value={parseFloat(pendingPct)}
+                            size="lg"
+                            radius="xl"
+                            color="violet"
+                          />
+                        </div>
+                      )}
+                    </Stack>
+                  </Card>
                 )
-              })
-            )}
-          </div>
-        </div>
+              })}
+            </Stack>
+          )}
+        </Stack>
       )}
     </>
   )
