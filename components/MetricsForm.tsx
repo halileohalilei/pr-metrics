@@ -25,7 +25,7 @@ import {
   fetchTeamMembers,
   calculateMetrics,
   type PRMetrics,
-} from '@/lib/github-api'
+} from '@/lib/github'
 
 // Helper function to format hours into human-readable string
 function formatHours(hours: number): string {
