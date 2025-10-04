@@ -1,0 +1,6 @@
+---
+description: Defines the general approach to keeping files tidy.
+alwaysApply: true
+---
+
+Keep TypeScript types in .types.ts files.
