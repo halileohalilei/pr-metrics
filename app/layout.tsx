@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ColorSchemeScript, MantineProvider } from '@mantine/core'
 import QueryProvider from '@/components/QueryProvider'
+import '@mantine/core/styles.css'
 
 export const metadata: Metadata = {
   title: 'PR Metrics',
@@ -15,7 +16,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="stylesheet" href="/mantine/styles.css" />
         <ColorSchemeScript />
       </head>
       <body>

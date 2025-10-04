@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "export": "next build && cp public/.nojekyll out/.nojekyll",
+    "deploy": "npm run export && gh-pages -d out -t",
     "postinstall": "mkdir -p public/mantine && cp node_modules/@mantine/core/styles.css public/mantine/styles.css && cp node_modules/@mantine/core/styles.layer.css public/mantine/styles.layer.css"
   },
   "dependencies": {
@@ -34,6 +36,7 @@
     "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.0",
+    "gh-pages": "^6.3.0",
     "typescript": "5.9.3"
   }
 }
