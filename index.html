@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Metrics</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>PR Review Metrics</h1>
+        
+        <form id="metricsForm">
+            <div class="form-group">
+                <label for="org">Organization Name *</label>
+                <input type="text" id="org" name="org" required placeholder="e.g., facebook">
+            </div>
+
+            <div class="form-group">
+                <label for="repo">Repository Name *</label>
+                <input type="text" id="repo" name="repo" required placeholder="e.g., react">
+            </div>
+
+            <div class="form-group">
+                <label for="token">GitHub Token *</label>
+                <input type="password" id="token" name="token" required placeholder="Your GitHub personal access token">
+                <small>Token needs 'repo' scope to access private repositories</small>
+            </div>
+
+            <div class="form-group">
+                <label>Date Range</label>
+                <div class="date-range">
+                    <div class="date-input-group">
+                        <label for="startDate">From</label>
+                        <input type="date" id="startDate" name="startDate">
+                    </div>
+                    <div class="date-input-group">
+                        <label for="endDate">To</label>
+                        <input type="date" id="endDate" name="endDate">
+                    </div>
+                </div>
+                <div class="or-divider">OR</div>
+                <div class="days-input-group">
+                    <label for="numDays">Number of Days (from today)</label>
+                    <input type="number" id="numDays" name="numDays" min="1" placeholder="e.g., 30">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="team">Team Name (optional)</label>
+                <input type="text" id="team" name="team" placeholder="e.g., frontend-team">
+                <small>Filter reviewers by team name. Leave empty to show all reviewers.</small>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn">See Metrics</button>
+        </form>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Fetching PR reviews...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="results" class="results" style="display: none;">
+            <h2>PR Review Metrics</h2>
+            <div id="metricsContainer"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
