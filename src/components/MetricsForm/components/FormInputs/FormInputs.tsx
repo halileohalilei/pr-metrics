@@ -1,6 +1,6 @@
 'use client'
 
-import { TextInput, PasswordInput, Button, Group, Stack, Divider, Text, NumberInput } from '@mantine/core'
+import { TextInput, PasswordInput, Button, Group, Stack, Divider, Text, NumberInput, Checkbox } from '@mantine/core'
 import { IconBrandGithub, IconCalendar, IconUsers } from '@tabler/icons-react'
 import { FormInputsProps } from './FormInputs.types'
 
@@ -11,6 +11,8 @@ export function FormInputs({
   numDays,
   startDate,
   endDate,
+  token,
+  storeToken,
   isLoading,
   onOrgChange,
   onRepoChange,
@@ -18,6 +20,8 @@ export function FormInputs({
   onNumDaysChange,
   onStartDateChange,
   onEndDateChange,
+  onTokenChange,
+  onStoreTokenChange,
 }: FormInputsProps) {
   return (
     <Stack gap="sm">
@@ -43,13 +47,24 @@ export function FormInputs({
         size="sm"
       />
 
-      <PasswordInput
-        label="GitHub Token"
-        name="token"
-        placeholder="Token with repo & read:org scopes"
-        required
-        size="sm"
-      />
+      <div>
+        <PasswordInput
+          label="GitHub Token"
+          name="token"
+          placeholder="Token with repo & read:org scopes"
+          required
+          size="sm"
+          value={token}
+          onChange={(e) => onTokenChange(e.target.value)}
+        />
+        <Checkbox
+          label="Store token locally"
+          size="xs"
+          mt={6}
+          checked={storeToken}
+          onChange={(e) => onStoreTokenChange(e.currentTarget.checked)}
+        />
+      </div>
 
       <div>
         <Text size="xs" fw={500} mb={4}>

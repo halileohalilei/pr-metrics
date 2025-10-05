@@ -9,6 +9,7 @@ import { FetchMetricsParams, FormState } from './MetricsForm.types'
 import styles from './MetricsForm.module.css'
 
 const STORAGE_KEY = 'pr-metrics-form'
+const TOKEN_STORAGE_KEY = 'pr-metrics-token'
 
 export function MetricsForm() {
   const [org, setOrg] = useState('')
@@ -17,6 +18,8 @@ export function MetricsForm() {
   const [numDays, setNumDays] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [token, setToken] = useState('')
+  const [storeToken, setStoreToken] = useState(false)
   const [error, setError] = useState('')
 
   // Load form values from localStorage on mount
@@ -35,6 +38,13 @@ export function MetricsForm() {
         // Ignore invalid stored data
       }
     }
+
+    // Load token if stored
+    const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY)
+    if (storedToken) {
+      setToken(storedToken)
+      setStoreToken(true)
+    }
   }, [])
 
   // Save form values to localStorage whenever they change
@@ -49,6 +59,22 @@ export function MetricsForm() {
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   }, [org, repo, team, numDays, startDate, endDate])
+
+  // Handle token storage
+  useEffect(() => {
+    if (storeToken && token) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token)
+    } else if (!storeToken) {
+      localStorage.removeItem(TOKEN_STORAGE_KEY)
+    }
+  }, [storeToken, token])
+
+  const handleStoreTokenChange = (checked: boolean) => {
+    setStoreToken(checked)
+    if (!checked) {
+      setToken('')
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: async (params: FetchMetricsParams) => {
@@ -107,8 +133,10 @@ export function MetricsForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const formData = new FormData(e.currentTarget)
-    const token = (formData.get('token') as string).trim()
+    if (!token.trim()) {
+      setError('Please provide a GitHub token.')
+      return
+    }
 
     // Validate date inputs
     let since: Date, until: Date
@@ -128,7 +156,7 @@ export function MetricsForm() {
     mutation.mutate({
       org: org.trim(),
       repo: repo.trim(),
-      token,
+      token: token.trim(),
       since,
       until,
       team: team.trim(),
@@ -146,6 +174,8 @@ export function MetricsForm() {
             numDays={numDays}
             startDate={startDate}
             endDate={endDate}
+            token={token}
+            storeToken={storeToken}
             isLoading={mutation.isPending}
             onOrgChange={setOrg}
             onRepoChange={setRepo}
@@ -153,6 +183,8 @@ export function MetricsForm() {
             onNumDaysChange={handleNumDaysChange}
             onStartDateChange={handleStartDateChange}
             onEndDateChange={handleEndDateChange}
+            onTokenChange={setToken}
+            onStoreTokenChange={handleStoreTokenChange}
           />
         </form>
       </div>

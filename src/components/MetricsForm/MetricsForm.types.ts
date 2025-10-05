@@ -14,5 +14,7 @@ export interface FormState {
   numDays: string
   startDate: string
   endDate: string
+  token?: string
+  storeToken?: boolean
 }
 
