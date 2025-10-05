@@ -14,7 +14,6 @@ import {
   Alert,
   Card,
   Grid,
-  Progress,
   Title,
   NumberInput,
   Table,
@@ -25,7 +24,6 @@ import {
   fetchAllPullRequests,
   fetchTeamMembers,
   calculateMetrics,
-  type PRMetrics,
 } from '@/lib/github'
 
 // Helper function to format hours into human-readable string
@@ -482,9 +480,26 @@ export default function MetricsForm() {
                       100
                     ).toFixed(1)
 
+                    const reviewerUrl = `https://github.com/${org}/${repo}/pulls?q=reviewed-by:${reviewer.name}`
+
                     return (
                       <Table.Tr key={reviewer.name}>
-                        <Table.Td style={{ fontWeight: 600 }}>{reviewer.name}</Table.Td>
+                        <Table.Td style={{ fontWeight: 600 }}>
+                          <a 
+                            href={reviewerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ 
+                              color: 'inherit',
+                              textDecoration: 'none',
+                              cursor: 'pointer',
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                          >
+                            {reviewer.name}
+                          </a>
+                        </Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>{reviewer.totalReviews}</Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>{reviewer.uniquePRs}</Table.Td>
                         <Table.Td style={{ textAlign: 'right' }}>
