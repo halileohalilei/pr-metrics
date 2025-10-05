@@ -1,9 +1,11 @@
+const isProduction = process.env.NODE_ENV === 'production';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/pr-metrics' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/pr-metrics/' : '',
+  basePath: isProduction ? '/pr-metrics' : '',
+  assetPrefix: isProduction ? '/pr-metrics/' : '',
   images: {
     unoptimized: true,
   },
