@@ -24,6 +24,9 @@ export const FETCH_PRS_QUERY = gql`
             nodes {
               author {
                 login
+                ... on User {
+                  name
+                }
               }
               state
               createdAt

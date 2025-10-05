@@ -6,6 +6,7 @@ import { createGitHubClient, fetchAllPullRequests, fetchTeamMembers, calculateMe
 import { FormInputs } from './components/FormInputs'
 import { MetricsResults } from './components/MetricsResults'
 import { FetchMetricsParams, FormState } from './MetricsForm.types'
+import styles from './MetricsForm.module.css'
 
 const STORAGE_KEY = 'pr-metrics-form'
 
@@ -135,34 +136,38 @@ export function MetricsForm() {
   }
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <FormInputs
+    <div className={styles.metricsLayout}>
+      <div className={styles.formColumn}>
+        <form onSubmit={handleSubmit}>
+          <FormInputs
+            org={org}
+            repo={repo}
+            team={team}
+            numDays={numDays}
+            startDate={startDate}
+            endDate={endDate}
+            isLoading={mutation.isPending}
+            onOrgChange={setOrg}
+            onRepoChange={setRepo}
+            onTeamChange={setTeam}
+            onNumDaysChange={handleNumDaysChange}
+            onStartDateChange={handleStartDateChange}
+            onEndDateChange={handleEndDateChange}
+          />
+        </form>
+      </div>
+
+      <div className={styles.resultsColumn}>
+        <MetricsResults
+          isPending={mutation.isPending}
+          isSuccess={mutation.isSuccess}
+          error={error}
+          data={mutation.data}
           org={org}
           repo={repo}
-          team={team}
-          numDays={numDays}
-          startDate={startDate}
-          endDate={endDate}
-          isLoading={mutation.isPending}
-          onOrgChange={setOrg}
-          onRepoChange={setRepo}
-          onTeamChange={setTeam}
-          onNumDaysChange={handleNumDaysChange}
-          onStartDateChange={handleStartDateChange}
-          onEndDateChange={handleEndDateChange}
         />
-      </form>
-
-      <MetricsResults
-        isPending={mutation.isPending}
-        isSuccess={mutation.isSuccess}
-        error={error}
-        data={mutation.data}
-        org={org}
-        repo={repo}
-      />
-    </>
+      </div>
+    </div>
   )
 }
 

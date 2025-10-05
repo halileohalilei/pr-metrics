@@ -1,0 +1,30 @@
+.metricsLayout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.formColumn {
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+}
+
+.resultsColumn {
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+  .metricsLayout {
+    grid-template-columns: 1fr;
+  }
+  
+  .formColumn {
+    max-width: 400px;
+    position: static;
+  }
+}
+

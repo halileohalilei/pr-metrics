@@ -12,9 +12,11 @@ export const reviewerLinkStyle: CSSProperties = {
 
 export const tableCellRightAlignStyle: CSSProperties = {
   textAlign: 'right',
+  fontSize: '0.95rem',
 }
 
 export const tableCellBoldStyle: CSSProperties = {
   fontWeight: 600,
+  fontSize: '0.95rem',
 }
 

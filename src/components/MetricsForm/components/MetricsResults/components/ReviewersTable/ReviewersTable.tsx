@@ -168,8 +168,8 @@ export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
   }
 
   return (
-    <Card shadow="sm" p="lg" radius="md" withBorder>
-      <Table striped highlightOnHover>
+    <Card shadow="sm" p="lg" radius="md" withBorder style={{ overflowX: 'auto' }}>
+      <Table striped highlightOnHover style={{ minWidth: '800px' }}>
         <Table.Thead>
           <Table.Tr>
             <SortableHeader column="name" label="Name" />
@@ -190,11 +190,11 @@ export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
             const dismissedPct = ((reviewer.dismissed / reviewer.totalReviews) * 100).toFixed(1)
             const pendingPct = ((reviewer.pending / reviewer.totalReviews) * 100).toFixed(1)
 
-            const reviewerUrl = `https://github.com/${org}/${repo}/pulls?q=reviewed-by:${reviewer.name}`
-            const isHovered = hoveredLink === reviewer.name
+            const reviewerUrl = `https://github.com/${org}/${repo}/pulls?q=reviewed-by:${reviewer.login}`
+            const isHovered = hoveredLink === reviewer.login
 
             return (
-              <Table.Tr key={reviewer.name}>
+              <Table.Tr key={reviewer.login}>
                 <Table.Td style={tableCellBoldStyle}>
                   <a
                     href={reviewerUrl}
@@ -204,7 +204,7 @@ export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
                       ...reviewerLinkStyle,
                       textDecoration: isHovered ? 'underline' : 'none',
                     }}
-                    onMouseEnter={() => setHoveredLink(reviewer.name)}
+                    onMouseEnter={() => setHoveredLink(reviewer.login)}
                     onMouseLeave={() => setHoveredLink(null)}
                   >
                     {reviewer.name}

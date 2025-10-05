@@ -14,6 +14,7 @@ export interface PullRequest {
     nodes: Array<{
       author: {
         login: string
+        name: string | null
       } | null
       state: string
       createdAt: string
@@ -35,6 +36,7 @@ export interface PullRequest {
 }
 
 export interface ReviewerMetric {
+  login: string
   name: string
   totalReviews: number
   approved: number

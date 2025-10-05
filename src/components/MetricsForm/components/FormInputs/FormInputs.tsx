@@ -20,47 +20,50 @@ export function FormInputs({
   onEndDateChange,
 }: FormInputsProps) {
   return (
-    <Stack gap="md">
+    <Stack gap="sm">
       <TextInput
-        label="Organization Name"
+        label="Organization"
         name="org"
         placeholder="e.g., facebook"
         required
         value={org}
         onChange={(e) => onOrgChange(e.target.value)}
-        leftSection={<IconBrandGithub size={16} />}
+        leftSection={<IconBrandGithub size={14} />}
+        size="sm"
       />
 
       <TextInput
-        label="Repository Name"
+        label="Repository"
         name="repo"
         placeholder="e.g., react"
         required
         value={repo}
         onChange={(e) => onRepoChange(e.target.value)}
-        leftSection={<IconBrandGithub size={16} />}
+        leftSection={<IconBrandGithub size={14} />}
+        size="sm"
       />
 
       <PasswordInput
         label="GitHub Token"
         name="token"
-        placeholder="Your GitHub personal access token"
+        placeholder="Token with repo & read:org scopes"
         required
-        description="Token needs 'repo' and 'read:org' scopes"
+        size="sm"
       />
 
       <div>
-        <Text size="sm" fw={500} mb="xs">
+        <Text size="xs" fw={500} mb={4}>
           Date Range
         </Text>
-        <Group grow align="flex-start" mb="xs">
+        <Group grow align="flex-start" mb={4}>
           <TextInput
             label="From"
             type="date"
             name="startDate"
             value={startDate}
             onChange={(e) => onStartDateChange(e.target.value)}
-            leftSection={<IconCalendar size={16} />}
+            leftSection={<IconCalendar size={14} />}
+            size="sm"
           />
           <TextInput
             label="To"
@@ -68,42 +71,45 @@ export function FormInputs({
             name="endDate"
             value={endDate}
             onChange={(e) => onEndDateChange(e.target.value)}
-            leftSection={<IconCalendar size={16} />}
+            leftSection={<IconCalendar size={14} />}
+            size="sm"
           />
         </Group>
 
-        <Divider label="OR" labelPosition="center" my="md" />
+        <Divider label="OR" labelPosition="center" my="xs" />
 
         <NumberInput
-          label="Number of Days (from today)"
+          label="Number of Days"
           name="numDays"
           placeholder="e.g., 30"
           min={1}
           value={numDays}
           onChange={(value) => onNumDaysChange(String(value))}
-          leftSection={<IconCalendar size={16} />}
+          leftSection={<IconCalendar size={14} />}
+          size="sm"
         />
       </div>
 
       <TextInput
-        label="Team Name (optional)"
+        label="Team (optional)"
         name="team"
         placeholder="e.g., frontend-team"
-        description="Filter reviewers by team name. Leave empty to show all reviewers."
         value={team}
         onChange={(e) => onTeamChange(e.target.value)}
-        leftSection={<IconUsers size={16} />}
+        leftSection={<IconUsers size={14} />}
+        size="sm"
       />
 
       <Button
         type="submit"
         fullWidth
-        size="lg"
+        size="md"
         loading={isLoading}
         gradient={{ from: 'violet', to: 'grape', deg: 135 }}
         variant="gradient"
+        mt="xs"
       >
-        See Metrics
+        Get Metrics
       </Button>
     </Stack>
   )

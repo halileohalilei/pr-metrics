@@ -59,11 +59,13 @@ export async function calculateMetrics(
     // Track reviewers (excluding self-reviews)
     for (const review of pr.reviews.nodes) {
       if (review.author && review.author.login !== pr.author?.login) {
-        const reviewer = review.author.login
+        const reviewerLogin = review.author.login
+        const reviewerName = review.author.name || review.author.login
 
-        if (!reviewerMetrics[reviewer]) {
-          reviewerMetrics[reviewer] = {
-            name: reviewer,
+        if (!reviewerMetrics[reviewerLogin]) {
+          reviewerMetrics[reviewerLogin] = {
+            login: reviewerLogin,
+            name: reviewerName,
             totalReviews: 0,
             approved: 0,
             changesRequested: 0,
@@ -74,14 +76,14 @@ export async function calculateMetrics(
           }
         }
 
-        reviewerMetrics[reviewer].totalReviews++
-        reviewerMetrics[reviewer].prsReviewed.add(pr.number)
+        reviewerMetrics[reviewerLogin].totalReviews++
+        reviewerMetrics[reviewerLogin].prsReviewed.add(pr.number)
 
-        if (review.state === 'APPROVED') reviewerMetrics[reviewer].approved++
-        if (review.state === 'CHANGES_REQUESTED') reviewerMetrics[reviewer].changesRequested++
-        if (review.state === 'COMMENTED') reviewerMetrics[reviewer].commented++
-        if (review.state === 'DISMISSED') reviewerMetrics[reviewer].dismissed++
-        if (review.state === 'PENDING') reviewerMetrics[reviewer].pending++
+        if (review.state === 'APPROVED') reviewerMetrics[reviewerLogin].approved++
+        if (review.state === 'CHANGES_REQUESTED') reviewerMetrics[reviewerLogin].changesRequested++
+        if (review.state === 'COMMENTED') reviewerMetrics[reviewerLogin].commented++
+        if (review.state === 'DISMISSED') reviewerMetrics[reviewerLogin].dismissed++
+        if (review.state === 'PENDING') reviewerMetrics[reviewerLogin].pending++
       }
     }
   }
@@ -90,7 +92,7 @@ export async function calculateMetrics(
   let filteredMetrics = Object.values(reviewerMetrics)
   if (teamMembers.length > 0) {
     filteredMetrics = filteredMetrics.filter((metric: any) =>
-      teamMembers.includes(metric.name)
+      teamMembers.includes(metric.login)
     )
   }
 

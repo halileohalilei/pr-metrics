@@ -30,9 +30,15 @@ export function MetricsResults({ isPending, isSuccess, error, data, org, repo }:
 
   if (isSuccess && data) {
     return (
-      <Stack gap="xl" mt="xl">
-        <Title order={2} ta="center">
-          PR Review Metrics
+      <Stack gap="lg">
+        <Title order={2} size="h2">
+          📊 Results
+        </Title>
+
+        <ReviewersTable reviewers={data.reviewers} org={org} repo={repo} />
+
+        <Title order={3} size="h4" mt="md">
+          📈 Statistics
         </Title>
 
         <MetricsOverview metrics={data} />
@@ -40,12 +46,6 @@ export function MetricsResults({ isPending, isSuccess, error, data, org, repo }:
         <ReviewTiming timing={data.timing} />
 
         <ReviewDistribution distribution={data.distribution} />
-
-        <Title order={3} size="h4" mt="md">
-          👥 Reviewers
-        </Title>
-
-        <ReviewersTable reviewers={data.reviewers} org={org} repo={repo} />
       </Stack>
     )
   }
