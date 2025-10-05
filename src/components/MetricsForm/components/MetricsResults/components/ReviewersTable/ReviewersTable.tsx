@@ -1,12 +1,163 @@
 'use client'
 
-import { Card, Table, Text } from '@mantine/core'
+import { Card, Table, Text, Group, UnstyledButton, Badge } from '@mantine/core'
+import { IconChevronUp, IconChevronDown, IconSelector } from '@tabler/icons-react'
 import { reviewerLinkStyle, tableCellRightAlignStyle, tableCellBoldStyle } from '../../../../MetricsForm.styles'
-import { ReviewersTableProps } from './ReviewersTable.types'
-import { useState } from 'react'
+import { ReviewersTableProps, SortColumn, SortDirection, SortMode } from './ReviewersTable.types'
+import { useState, useMemo } from 'react'
 
 export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
+  const [sortColumn, setSortColumn] = useState<SortColumn>('totalReviews')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [sortMode, setSortMode] = useState<SortMode>('count')
+
+  const sortedReviewers = useMemo(() => {
+    const sorted = [...reviewers].sort((a, b) => {
+      let aValue: number | string = 0
+      let bValue: number | string = 0
+
+      switch (sortColumn) {
+        case 'name':
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+          break
+        case 'totalReviews':
+          aValue = a.totalReviews
+          bValue = b.totalReviews
+          break
+        case 'uniquePRs':
+          aValue = a.uniquePRs
+          bValue = b.uniquePRs
+          break
+        case 'approved':
+          if (sortMode === 'percentage') {
+            aValue = a.totalReviews > 0 ? (a.approved / a.totalReviews) * 100 : 0
+            bValue = b.totalReviews > 0 ? (b.approved / b.totalReviews) * 100 : 0
+          } else {
+            aValue = a.approved
+            bValue = b.approved
+          }
+          break
+        case 'changesRequested':
+          if (sortMode === 'percentage') {
+            aValue = a.totalReviews > 0 ? (a.changesRequested / a.totalReviews) * 100 : 0
+            bValue = b.totalReviews > 0 ? (b.changesRequested / b.totalReviews) * 100 : 0
+          } else {
+            aValue = a.changesRequested
+            bValue = b.changesRequested
+          }
+          break
+        case 'commented':
+          if (sortMode === 'percentage') {
+            aValue = a.totalReviews > 0 ? (a.commented / a.totalReviews) * 100 : 0
+            bValue = b.totalReviews > 0 ? (b.commented / b.totalReviews) * 100 : 0
+          } else {
+            aValue = a.commented
+            bValue = b.commented
+          }
+          break
+        case 'dismissed':
+          if (sortMode === 'percentage') {
+            aValue = a.totalReviews > 0 ? (a.dismissed / a.totalReviews) * 100 : 0
+            bValue = b.totalReviews > 0 ? (b.dismissed / b.totalReviews) * 100 : 0
+          } else {
+            aValue = a.dismissed
+            bValue = b.dismissed
+          }
+          break
+        case 'pending':
+          if (sortMode === 'percentage') {
+            aValue = a.totalReviews > 0 ? (a.pending / a.totalReviews) * 100 : 0
+            bValue = b.totalReviews > 0 ? (b.pending / b.totalReviews) * 100 : 0
+          } else {
+            aValue = a.pending
+            bValue = b.pending
+          }
+          break
+      }
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue)
+      }
+
+      return sortDirection === 'asc' 
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number)
+    })
+
+    return sorted
+  }, [reviewers, sortColumn, sortDirection, sortMode])
+
+  const percentageColumns: SortColumn[] = ['approved', 'changesRequested', 'commented', 'dismissed', 'pending']
+  const supportsPercentage = (column: SortColumn) => percentageColumns.includes(column)
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      // Same column clicked - cycle through sort modes
+      if (supportsPercentage(column)) {
+        // Cycle: count desc -> count asc -> percentage desc -> percentage asc -> count desc
+        if (sortMode === 'count' && sortDirection === 'desc') {
+          setSortDirection('asc')
+        } else if (sortMode === 'count' && sortDirection === 'asc') {
+          setSortMode('percentage')
+          setSortDirection('desc')
+        } else if (sortMode === 'percentage' && sortDirection === 'desc') {
+          setSortDirection('asc')
+        } else {
+          // Back to count desc
+          setSortMode('count')
+          setSortDirection('desc')
+        }
+      } else {
+        // Just toggle direction for non-percentage columns
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+      }
+    } else {
+      // New column clicked
+      setSortColumn(column)
+      setSortDirection('desc')
+      setSortMode('count')
+    }
+  }
+
+  const getSortIcon = (column: SortColumn) => {
+    if (sortColumn !== column) {
+      return <IconSelector size={14} />
+    }
+    return sortDirection === 'asc' 
+      ? <IconChevronUp size={14} />
+      : <IconChevronDown size={14} />
+  }
+
+  const SortableHeader = ({ column, label, align = 'left' }: { 
+    column: SortColumn
+    label: string
+    align?: 'left' | 'right'
+  }) => {
+    const isActive = sortColumn === column
+    const showModeIndicator = isActive && supportsPercentage(column)
+
+    return (
+      <Table.Th style={align === 'right' ? tableCellRightAlignStyle : undefined}>
+        <UnstyledButton onClick={() => handleSort(column)} style={{ width: '100%' }}>
+          <Group gap={4} justify={align === 'right' ? 'flex-end' : 'flex-start'} wrap="nowrap">
+            <Text size="sm" fw={500} style={{ whiteSpace: 'nowrap' }}>
+              {label}
+            </Text>
+            {showModeIndicator && (
+              <Badge size="xs" variant="light" color={sortMode === 'percentage' ? 'blue' : 'gray'}>
+                {sortMode === 'percentage' ? '%' : '#'}
+              </Badge>
+            )}
+            {getSortIcon(column)}
+          </Group>
+        </UnstyledButton>
+      </Table.Th>
+    )
+  }
 
   if (reviewers.length === 0) {
     return (
@@ -21,18 +172,18 @@ export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
       <Table striped highlightOnHover>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th style={tableCellRightAlignStyle}>Total Reviews</Table.Th>
-            <Table.Th style={tableCellRightAlignStyle}>Unique PRs</Table.Th>
-            <Table.Th style={tableCellRightAlignStyle}>Approved</Table.Th>
-            <Table.Th style={tableCellRightAlignStyle}>Changes Requested</Table.Th>
-            <Table.Th style={tableCellRightAlignStyle}>Commented</Table.Th>
-            <Table.Th style={tableCellRightAlignStyle}>Dismissed</Table.Th>
-            <Table.Th style={tableCellRightAlignStyle}>Pending</Table.Th>
+            <SortableHeader column="name" label="Name" />
+            <SortableHeader column="totalReviews" label="Total Reviews" align="right" />
+            <SortableHeader column="uniquePRs" label="Unique PRs" align="right" />
+            <SortableHeader column="approved" label="Approved" align="right" />
+            <SortableHeader column="changesRequested" label="Changes Requested" align="right" />
+            <SortableHeader column="commented" label="Commented" align="right" />
+            <SortableHeader column="dismissed" label="Dismissed" align="right" />
+            <SortableHeader column="pending" label="Pending" align="right" />
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {reviewers.map((reviewer) => {
+          {sortedReviewers.map((reviewer) => {
             const approvedPct = ((reviewer.approved / reviewer.totalReviews) * 100).toFixed(1)
             const changesRequestedPct = ((reviewer.changesRequested / reviewer.totalReviews) * 100).toFixed(1)
             const commentedPct = ((reviewer.commented / reviewer.totalReviews) * 100).toFixed(1)

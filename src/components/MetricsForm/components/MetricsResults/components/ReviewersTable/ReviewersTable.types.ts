@@ -6,3 +6,17 @@ export interface ReviewersTableProps {
   repo: string
 }
 
+export type SortColumn = 
+  | 'name'
+  | 'totalReviews'
+  | 'uniquePRs'
+  | 'approved'
+  | 'changesRequested'
+  | 'commented'
+  | 'dismissed'
+  | 'pending'
+
+export type SortDirection = 'asc' | 'desc'
+
+export type SortMode = 'count' | 'percentage'
+
