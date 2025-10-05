@@ -1,10 +1,11 @@
 'use client'
 
-import { Card, Table, Text, Group, UnstyledButton, Badge } from '@mantine/core'
-import { IconChevronUp, IconChevronDown, IconSelector } from '@tabler/icons-react'
+import { Card, Table, Text, Group, UnstyledButton, Badge, Button, Menu } from '@mantine/core'
+import { IconChevronUp, IconChevronDown, IconSelector, IconDownload, IconFileTypeCsv, IconMarkdown } from '@tabler/icons-react'
 import { reviewerLinkStyle, tableCellRightAlignStyle, tableCellBoldStyle } from '../../../../MetricsForm.styles'
 import { ReviewersTableProps, SortColumn, SortDirection, SortMode } from './ReviewersTable.types'
 import { useState, useMemo } from 'react'
+import { notifications } from '@mantine/notifications'
 
 export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
@@ -132,6 +133,87 @@ export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
       : <IconChevronDown size={14} />
   }
 
+  const exportAsCSV = () => {
+    const headers = ['Name', 'Total Reviews', 'Unique PRs', 'Approved', 'Changes Requested', 'Commented', 'Dismissed', 'Pending']
+    const csvRows = [headers.join(',')]
+
+    sortedReviewers.forEach((reviewer) => {
+      const approvedPct = ((reviewer.approved / reviewer.totalReviews) * 100).toFixed(1)
+      const changesRequestedPct = ((reviewer.changesRequested / reviewer.totalReviews) * 100).toFixed(1)
+      const commentedPct = ((reviewer.commented / reviewer.totalReviews) * 100).toFixed(1)
+      const dismissedPct = ((reviewer.dismissed / reviewer.totalReviews) * 100).toFixed(1)
+      const pendingPct = ((reviewer.pending / reviewer.totalReviews) * 100).toFixed(1)
+
+      const row = [
+        `"${reviewer.name}"`,
+        reviewer.totalReviews,
+        reviewer.uniquePRs,
+        `"${reviewer.approved} (${approvedPct}%)"`,
+        `"${reviewer.changesRequested} (${changesRequestedPct}%)"`,
+        `"${reviewer.commented} (${commentedPct}%)"`,
+        reviewer.dismissed > 0 ? `"${reviewer.dismissed} (${dismissedPct}%)"` : '"-"',
+        reviewer.pending > 0 ? `"${reviewer.pending} (${pendingPct}%)"` : '"-"'
+      ]
+      csvRows.push(row.join(','))
+    })
+
+    const csvContent = csvRows.join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `pr-metrics-${org}-${repo}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    
+    notifications.show({
+      title: 'Success',
+      message: 'CSV file downloaded successfully',
+      color: 'green',
+    })
+  }
+
+  const copyAsMarkdown = () => {
+    const headers = ['Name', 'Total Reviews', 'Unique PRs', 'Approved', 'Changes Requested', 'Commented', 'Dismissed', 'Pending']
+    const separator = headers.map(() => '---').join(' | ')
+    const headerRow = headers.join(' | ')
+    
+    const rows = sortedReviewers.map((reviewer) => {
+      const approvedPct = ((reviewer.approved / reviewer.totalReviews) * 100).toFixed(1)
+      const changesRequestedPct = ((reviewer.changesRequested / reviewer.totalReviews) * 100).toFixed(1)
+      const commentedPct = ((reviewer.commented / reviewer.totalReviews) * 100).toFixed(1)
+      const dismissedPct = ((reviewer.dismissed / reviewer.totalReviews) * 100).toFixed(1)
+      const pendingPct = ((reviewer.pending / reviewer.totalReviews) * 100).toFixed(1)
+
+      return [
+        reviewer.name,
+        reviewer.totalReviews,
+        reviewer.uniquePRs,
+        `${reviewer.approved} (${approvedPct}%)`,
+        `${reviewer.changesRequested} (${changesRequestedPct}%)`,
+        `${reviewer.commented} (${commentedPct}%)`,
+        reviewer.dismissed > 0 ? `${reviewer.dismissed} (${dismissedPct}%)` : '-',
+        reviewer.pending > 0 ? `${reviewer.pending} (${pendingPct}%)` : '-'
+      ].join(' | ')
+    })
+
+    const markdown = [headerRow, separator, ...rows].join('\n')
+    
+    navigator.clipboard.writeText(markdown).then(() => {
+      notifications.show({
+        title: 'Success',
+        message: 'Markdown table copied to clipboard',
+        color: 'green',
+      })
+    }).catch(() => {
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to copy to clipboard',
+        color: 'red',
+      })
+    })
+  }
+
   const SortableHeader = ({ column, label, align = 'left' }: { 
     column: SortColumn
     label: string
@@ -168,8 +250,39 @@ export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
   }
 
   return (
-    <Card shadow="sm" p="lg" radius="md" withBorder style={{ overflowX: 'auto' }}>
-      <Table striped highlightOnHover style={{ minWidth: '800px' }}>
+    <>
+      <Group justify="flex-end" mb="sm">
+        <Menu shadow="md" width={200}>
+          <Menu.Target>
+            <Button
+              leftSection={<IconDownload size={16} />}
+              variant="light"
+              size="sm"
+            >
+              Export
+            </Button>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Label>Export Options</Menu.Label>
+            <Menu.Item
+              leftSection={<IconFileTypeCsv size={16} />}
+              onClick={exportAsCSV}
+            >
+              Export as CSV
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconMarkdown size={16} />}
+              onClick={copyAsMarkdown}
+            >
+              Copy as Markdown
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
+
+      <Card shadow="sm" p="lg" radius="md" withBorder style={{ overflowX: 'auto' }}>
+        <Table striped highlightOnHover style={{ minWidth: '800px' }}>
         <Table.Thead>
           <Table.Tr>
             <SortableHeader column="name" label="Name" />
@@ -233,6 +346,7 @@ export function ReviewersTable({ reviewers, org, repo }: ReviewersTableProps) {
         </Table.Tbody>
       </Table>
     </Card>
+    </>
   )
 }
 

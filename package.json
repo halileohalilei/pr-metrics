@@ -10,7 +10,7 @@
     "lint": "next lint",
     "export": "next build && cp public/.nojekyll out/.nojekyll",
     "deploy": "npm run export && gh-pages -d out -t",
-    "postinstall": "mkdir -p public/mantine && cp node_modules/@mantine/core/styles.css public/mantine/styles.css && cp node_modules/@mantine/core/styles.layer.css public/mantine/styles.layer.css"
+    "postinstall": "mkdir -p public/mantine && cp node_modules/@mantine/core/styles.css public/mantine/styles.css && cp node_modules/@mantine/core/styles.layer.css public/mantine/styles.layer.css && cp -r node_modules/@mantine/notifications/styles.css public/mantine/notifications.css 2>/dev/null || true"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",

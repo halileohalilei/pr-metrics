@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { ColorSchemeScript, MantineProvider } from '@mantine/core'
+import { Notifications } from '@mantine/notifications'
 import { QueryProvider } from '@/components/QueryProvider'
 import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
 
 export const metadata: Metadata = {
   title: 'PR Metrics',
@@ -38,6 +40,7 @@ export default function RootLayout({
             },
           }}
         >
+          <Notifications />
           <QueryProvider>{children}</QueryProvider>
         </MantineProvider>
       </body>
