@@ -8,7 +8,8 @@ export async function fetchAllPullRequests(
   owner: string,
   repo: string,
   since: Date,
-  until: Date
+  until: Date,
+  signal?: AbortSignal
 ): Promise<PullRequest[]> {
   const allPRs: PullRequest[] = []
   let hasNextPage = true
@@ -19,6 +20,11 @@ export async function fetchAllPullRequests(
   console.log(`Fetching PRs from ${owner}/${repo}...`)
 
   while (hasNextPage) {
+    // Check if aborted
+    if (signal?.aborted) {
+      throw new Error('Request cancelled')
+    }
+    
     try {
       batchCount++
       const data: any = await retryWithBackoff(async () => {
@@ -28,7 +34,7 @@ export async function fetchAllPullRequests(
           cursor,
           limit: batchSize,
         })
-      })
+      }, signal)
 
       const prs = data.repository.pullRequests.nodes
       const pageInfo = data.repository.pullRequests.pageInfo

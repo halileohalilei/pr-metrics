@@ -4,6 +4,7 @@ import { Notifications } from '@mantine/notifications'
 import { QueryProvider } from '@/components/QueryProvider'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
+import '@mantine/dates/styles.css'
 
 export const metadata: Metadata = {
   title: 'PR Metrics',

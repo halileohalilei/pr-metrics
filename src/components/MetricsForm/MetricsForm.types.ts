@@ -5,13 +5,13 @@ export interface FetchMetricsParams {
   since: Date
   until: Date
   team: string
+  signal?: AbortSignal
 }
 
 export interface FormState {
   org: string
   repo: string
   team: string
-  numDays: string
   startDate: string
   endDate: string
   token?: string

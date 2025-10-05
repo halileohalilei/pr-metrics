@@ -5,7 +5,8 @@ import { retryWithBackoff, delay } from '../utils/retry'
 export async function fetchTeamMembers(
   client: GraphQLClient,
   org: string,
-  teamSlug: string
+  teamSlug: string,
+  signal?: AbortSignal
 ): Promise<string[]> {
   try {
     const allMembers: string[] = []
@@ -15,13 +16,18 @@ export async function fetchTeamMembers(
     console.log(`Fetching team members from ${org}/${teamSlug}...`)
 
     while (hasNextPage) {
+      // Check if aborted
+      if (signal?.aborted) {
+        throw new Error('Request cancelled')
+      }
+      
       const data: any = await retryWithBackoff(async () => {
         return await client.request(FETCH_TEAM_MEMBERS_QUERY, {
           org,
           teamSlug,
           cursor,
         })
-      })
+      }, signal)
 
       if (!data.organization?.team) {
         console.warn('Team not found. Showing all reviewers.')

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent, useEffect } from 'react'
+import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { createGitHubClient, fetchAllPullRequests, fetchTeamMembers, calculateMetrics } from '@/lib/github'
 import { FormInputs } from './components/FormInputs'
@@ -15,12 +15,11 @@ export function MetricsForm() {
   const [org, setOrg] = useState('')
   const [repo, setRepo] = useState('')
   const [team, setTeam] = useState('')
-  const [numDays, setNumDays] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null])
   const [token, setToken] = useState('')
   const [storeToken, setStoreToken] = useState(false)
   const [error, setError] = useState('')
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Load form values from localStorage on mount
   useEffect(() => {
@@ -31,9 +30,9 @@ export function MetricsForm() {
         if (data.org) setOrg(data.org)
         if (data.repo) setRepo(data.repo)
         if (data.team) setTeam(data.team)
-        if (data.numDays) setNumDays(data.numDays)
-        if (data.startDate) setStartDate(data.startDate)
-        if (data.endDate) setEndDate(data.endDate)
+        if (data.startDate && data.endDate) {
+          setDateRange([new Date(data.startDate), new Date(data.endDate)])
+        }
       } catch (e) {
         // Ignore invalid stored data
       }
@@ -53,12 +52,11 @@ export function MetricsForm() {
       org,
       repo,
       team,
-      numDays,
-      startDate,
-      endDate,
+      startDate: dateRange[0] ? dateRange[0].toISOString() : '',
+      endDate: dateRange[1] ? dateRange[1].toISOString() : '',
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  }, [org, repo, team, numDays, startDate, endDate])
+  }, [org, repo, team, dateRange])
 
   // Handle token storage
   useEffect(() => {
@@ -78,13 +76,13 @@ export function MetricsForm() {
 
   const mutation = useMutation({
     mutationFn: async (params: FetchMetricsParams) => {
-      const { org, repo, token, since, until, team } = params
+      const { org, repo, token, since, until, team, signal } = params
 
       // Create GitHub GraphQL client
-      const client = createGitHubClient(token)
+      const client = createGitHubClient(token, signal)
 
       // Fetch all pull requests
-      const prs = await fetchAllPullRequests(client, org, repo, since, until)
+      const prs = await fetchAllPullRequests(client, org, repo, since, until, signal)
 
       if (prs.length === 0) {
         throw new Error('No pull requests found in the specified date range.')
@@ -93,7 +91,7 @@ export function MetricsForm() {
       // Fetch team members if team filter is specified
       let teamMembers: string[] = []
       if (team) {
-        teamMembers = await fetchTeamMembers(client, org, team)
+        teamMembers = await fetchTeamMembers(client, org, team, signal)
       }
 
       // Calculate metrics
@@ -101,32 +99,22 @@ export function MetricsForm() {
       return metrics
     },
     onError: (err: Error) => {
-      setError(err.message)
+      if (err.message !== 'Request cancelled') {
+        setError(err.message)
+      }
+      abortControllerRef.current = null
     },
     onSuccess: () => {
       setError('')
+      abortControllerRef.current = null
     },
   })
 
-  const handleNumDaysChange = (value: string) => {
-    setNumDays(value)
-    if (value) {
-      setStartDate('')
-      setEndDate('')
-    }
-  }
-
-  const handleStartDateChange = (value: string) => {
-    setStartDate(value)
-    if (value) {
-      setNumDays('')
-    }
-  }
-
-  const handleEndDateChange = (value: string) => {
-    setEndDate(value)
-    if (value) {
-      setNumDays('')
+  const handleCancel = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+      setError('Request cancelled')
     }
   }
 
@@ -139,19 +127,18 @@ export function MetricsForm() {
     }
 
     // Validate date inputs
-    let since: Date, until: Date
-    if (numDays) {
-      const now = new Date()
-      since = new Date(now.getTime() - parseInt(numDays) * 24 * 60 * 60 * 1000)
-      until = now
-    } else if (startDate && endDate) {
-      since = new Date(startDate)
-      until = new Date(endDate)
-      until.setHours(23, 59, 59, 999) // End of day
-    } else {
-      setError('Please specify either a date range or number of days.')
+    const [startDate, endDate] = dateRange
+    if (!startDate || !endDate) {
+      setError('Please select a date range.')
       return
     }
+
+    const since = new Date(startDate)
+    const until = new Date(endDate)
+    until.setHours(23, 59, 59, 999) // End of day
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController()
 
     mutation.mutate({
       org: org.trim(),
@@ -160,6 +147,7 @@ export function MetricsForm() {
       since,
       until,
       team: team.trim(),
+      signal: abortControllerRef.current.signal,
     })
   }
 
@@ -171,20 +159,17 @@ export function MetricsForm() {
             org={org}
             repo={repo}
             team={team}
-            numDays={numDays}
-            startDate={startDate}
-            endDate={endDate}
+            dateRange={dateRange}
             token={token}
             storeToken={storeToken}
             isLoading={mutation.isPending}
             onOrgChange={setOrg}
             onRepoChange={setRepo}
             onTeamChange={setTeam}
-            onNumDaysChange={handleNumDaysChange}
-            onStartDateChange={handleStartDateChange}
-            onEndDateChange={handleEndDateChange}
+            onDateRangeChange={setDateRange}
             onTokenChange={setToken}
             onStoreTokenChange={handleStoreTokenChange}
+            onCancel={handleCancel}
           />
         </form>
       </div>

@@ -6,12 +6,18 @@ function delay(ms: number): Promise<void> {
 // Retry logic with exponential backoff
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
+  signal?: AbortSignal,
   maxRetries: number = 3,
   initialDelay: number = 1000
 ): Promise<T> {
   let lastError: Error | undefined
   
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // Check if aborted
+    if (signal?.aborted) {
+      throw new Error('Request cancelled')
+    }
+    
     try {
       return await fn()
     } catch (error: any) {

@@ -1,27 +1,25 @@
 'use client'
 
-import { TextInput, PasswordInput, Button, Group, Stack, Divider, Text, NumberInput, Checkbox } from '@mantine/core'
-import { IconBrandGithub, IconCalendar, IconUsers } from '@tabler/icons-react'
+import { TextInput, PasswordInput, Button, Stack, Checkbox, Group } from '@mantine/core'
+import { IconBrandGithub, IconUsers, IconX } from '@tabler/icons-react'
 import { FormInputsProps } from './FormInputs.types'
+import { DateRangePicker } from '../DateRangePicker'
 
 export function FormInputs({
   org,
   repo,
   team,
-  numDays,
-  startDate,
-  endDate,
+  dateRange,
   token,
   storeToken,
   isLoading,
   onOrgChange,
   onRepoChange,
   onTeamChange,
-  onNumDaysChange,
-  onStartDateChange,
-  onEndDateChange,
+  onDateRangeChange,
   onTokenChange,
   onStoreTokenChange,
+  onCancel,
 }: FormInputsProps) {
   return (
     <Stack gap="sm">
@@ -66,44 +64,7 @@ export function FormInputs({
         />
       </div>
 
-      <div>
-        <Text size="xs" fw={500} mb={4}>
-          Date Range
-        </Text>
-        <Group grow align="flex-start" mb={4}>
-          <TextInput
-            label="From"
-            type="date"
-            name="startDate"
-            value={startDate}
-            onChange={(e) => onStartDateChange(e.target.value)}
-            leftSection={<IconCalendar size={14} />}
-            size="sm"
-          />
-          <TextInput
-            label="To"
-            type="date"
-            name="endDate"
-            value={endDate}
-            onChange={(e) => onEndDateChange(e.target.value)}
-            leftSection={<IconCalendar size={14} />}
-            size="sm"
-          />
-        </Group>
-
-        <Divider label="OR" labelPosition="center" my="xs" />
-
-        <NumberInput
-          label="Number of Days"
-          name="numDays"
-          placeholder="e.g., 30"
-          min={1}
-          value={numDays}
-          onChange={(value) => onNumDaysChange(String(value))}
-          leftSection={<IconCalendar size={14} />}
-          size="sm"
-        />
-      </div>
+      <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
 
       <TextInput
         label="Team (optional)"
@@ -115,17 +76,41 @@ export function FormInputs({
         size="sm"
       />
 
-      <Button
-        type="submit"
-        fullWidth
-        size="md"
-        loading={isLoading}
-        gradient={{ from: 'violet', to: 'grape', deg: 135 }}
-        variant="gradient"
-        mt="xs"
-      >
-        Get Metrics
-      </Button>
+      {isLoading ? (
+        <Group gap="xs" mt="xs">
+          <Button
+            type="submit"
+            style={{ flex: 1 }}
+            size="md"
+            loading={isLoading}
+            gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+            variant="gradient"
+          >
+            Get Metrics
+          </Button>
+          <Button
+            type="button"
+            size="md"
+            color="red"
+            variant="light"
+            onClick={onCancel}
+            leftSection={<IconX size={16} />}
+          >
+            Cancel
+          </Button>
+        </Group>
+      ) : (
+        <Button
+          type="submit"
+          fullWidth
+          size="md"
+          gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+          variant="gradient"
+          mt="xs"
+        >
+          Get Metrics
+        </Button>
+      )}
     </Stack>
   )
 }

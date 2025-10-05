@@ -10,16 +10,19 @@
     "lint": "next lint",
     "export": "next build && cp public/.nojekyll out/.nojekyll",
     "deploy": "npm run export && gh-pages -d out -t",
-    "postinstall": "mkdir -p public/mantine && cp node_modules/@mantine/core/styles.css public/mantine/styles.css && cp node_modules/@mantine/core/styles.layer.css public/mantine/styles.layer.css && cp -r node_modules/@mantine/notifications/styles.css public/mantine/notifications.css 2>/dev/null || true"
+    "postinstall": "mkdir -p public/mantine && cp node_modules/@mantine/core/styles.css public/mantine/styles.css && cp node_modules/@mantine/core/styles.layer.css public/mantine/styles.layer.css && cp -r node_modules/@mantine/notifications/styles.css public/mantine/notifications.css && cp -r node_modules/@mantine/dates/styles.css public/mantine/dates.css 2>/dev/null || true"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mantine/core": "^7.13.5",
-    "@mantine/hooks": "^7.13.5",
+    "@mantine/core": "^7.17.8",
+    "@mantine/dates": "^7.17.8",
+    "@mantine/hooks": "^7.17.8",
+    "@mantine/notifications": "^7.17.8",
     "@tabler/icons-react": "^3.35.0",
     "@tanstack/react-query": "^5.90.2",
+    "dayjs": "^1.11.18",
     "graphql": "^16.11.0",
     "graphql-request": "^7.2.0",
     "next": "14.2.0",
@@ -29,7 +32,7 @@
   },
   "devDependencies": {
     "@types/node": "20.19.19",
-    "@types/react": "^18.3.25",
+    "@types/react": "18.3.25",
     "@types/react-dom": "^18.3.7",
     "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
