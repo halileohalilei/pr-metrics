@@ -3,4 +3,18 @@ description: Defines the general approach to keeping files tidy.
 alwaysApply: true
 ---
 
+# General
+
 Keep TypeScript types in .types.ts files.
+Except the files that need to be in certain directories like `app` for Next.js's app router, all source code files need to be under `src`.
+
+# Components
+Each component should have its own directory with the name of the component.
+No inline styling.
+The component should be exported from an index.ts file, but DO NOT do barrel imports. If anything else needs to be exported from a component module, it should not be exported from the index.ts file.
+Each component should comprise of this strcutre:
+ - ComponentName.tsx
+ - index.ts
+ - ComponentName.styles.ts (in case there is any custom styling for the component)
+ - ComponentName.types.ts (in case types need to be defined for the component)
+ - components/ (in case there are subcomponents required for the component to make things more modular.)

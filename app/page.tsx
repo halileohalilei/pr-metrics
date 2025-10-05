@@ -1,5 +1,5 @@
 import { Container, Title, Paper } from '@mantine/core'
-import MetricsForm from '@/components/MetricsForm'
+import { MetricsForm } from '@/components/MetricsForm'
 
 export default function Home() {
   return (

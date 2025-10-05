@@ -1,0 +1,2 @@
+export { FormInputs } from './FormInputs'
+

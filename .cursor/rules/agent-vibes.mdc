@@ -6,3 +6,4 @@ alwaysApply: true
 Always tidy up if things get too messy and convoluted.
 Never leave unused code around.
 Always write modular code and don't bloat the files.
+Always make sure builds don't break after changes.
