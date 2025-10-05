@@ -17,6 +17,7 @@ import {
   Progress,
   Title,
   NumberInput,
+  Table,
 } from '@mantine/core'
 import { IconBrandGithub, IconCalendar, IconUsers, IconAlertCircle } from '@tabler/icons-react'
 import {
@@ -398,152 +399,69 @@ export default function MetricsForm() {
               No reviewers found in the specified criteria.
             </Text>
           ) : (
-            <Stack gap="md">
-              {mutation.data.reviewers.map((reviewer) => {
-                const approvedPct = (
-                  (reviewer.approved / reviewer.totalReviews) *
-                  100
-                ).toFixed(1)
-                const changesRequestedPct = (
-                  (reviewer.changesRequested / reviewer.totalReviews) *
-                  100
-                ).toFixed(1)
-                const commentedPct = (
-                  (reviewer.commented / reviewer.totalReviews) *
-                  100
-                ).toFixed(1)
-                const dismissedPct = (
-                  (reviewer.dismissed / reviewer.totalReviews) *
-                  100
-                ).toFixed(1)
-                const pendingPct = (
-                  (reviewer.pending / reviewer.totalReviews) *
-                  100
-                ).toFixed(1)
+            <Card shadow="sm" p="lg" radius="md" withBorder>
+              <Table striped highlightOnHover>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Name</Table.Th>
+                    <Table.Th style={{ textAlign: 'right' }}>Total Reviews</Table.Th>
+                    <Table.Th style={{ textAlign: 'right' }}>Unique PRs</Table.Th>
+                    <Table.Th style={{ textAlign: 'right' }}>Approved</Table.Th>
+                    <Table.Th style={{ textAlign: 'right' }}>Changes Requested</Table.Th>
+                    <Table.Th style={{ textAlign: 'right' }}>Commented</Table.Th>
+                    <Table.Th style={{ textAlign: 'right' }}>Dismissed</Table.Th>
+                    <Table.Th style={{ textAlign: 'right' }}>Pending</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {mutation.data.reviewers.map((reviewer) => {
+                    const approvedPct = (
+                      (reviewer.approved / reviewer.totalReviews) *
+                      100
+                    ).toFixed(1)
+                    const changesRequestedPct = (
+                      (reviewer.changesRequested / reviewer.totalReviews) *
+                      100
+                    ).toFixed(1)
+                    const commentedPct = (
+                      (reviewer.commented / reviewer.totalReviews) *
+                      100
+                    ).toFixed(1)
+                    const dismissedPct = (
+                      (reviewer.dismissed / reviewer.totalReviews) *
+                      100
+                    ).toFixed(1)
+                    const pendingPct = (
+                      (reviewer.pending / reviewer.totalReviews) *
+                      100
+                    ).toFixed(1)
 
-                return (
-                  <Card
-                    key={reviewer.name}
-                    shadow="sm"
-                    p="lg"
-                    radius="md"
-                    withBorder
-                    style={{ borderLeft: '4px solid var(--mantine-color-violet-6)' }}
-                  >
-                    <Title order={4} size="h5" mb="md">
-                      {reviewer.name}
-                    </Title>
-                    <Stack gap="sm">
-                      <Group justify="space-between">
-                        <Text size="sm" c="dimmed">
-                          Total Reviews
-                        </Text>
-                        <Text size="sm" fw={600}>
-                          {reviewer.totalReviews}
-                        </Text>
-                      </Group>
-                      <Group justify="space-between">
-                        <Text size="sm" c="dimmed">
-                          Unique PRs Reviewed
-                        </Text>
-                        <Text size="sm" fw={600}>
-                          {reviewer.uniquePRs}
-                        </Text>
-                      </Group>
-
-                      <div>
-                        <Group justify="space-between" mb={5}>
-                          <Text size="sm" c="dimmed">
-                            Approved
-                          </Text>
-                          <Text size="sm" fw={600}>
-                            {reviewer.approved} ({approvedPct}%)
-                          </Text>
-                        </Group>
-                        <Progress
-                          value={parseFloat(approvedPct)}
-                          size="lg"
-                          radius="xl"
-                          color="violet"
-                        />
-                      </div>
-
-                      <div>
-                        <Group justify="space-between" mb={5}>
-                          <Text size="sm" c="dimmed">
-                            Changes Requested
-                          </Text>
-                          <Text size="sm" fw={600}>
-                            {reviewer.changesRequested} ({changesRequestedPct}%)
-                          </Text>
-                        </Group>
-                        <Progress
-                          value={parseFloat(changesRequestedPct)}
-                          size="lg"
-                          radius="xl"
-                          color="violet"
-                        />
-                      </div>
-
-                      <div>
-                        <Group justify="space-between" mb={5}>
-                          <Text size="sm" c="dimmed">
-                            Commented
-                          </Text>
-                          <Text size="sm" fw={600}>
-                            {reviewer.commented} ({commentedPct}%)
-                          </Text>
-                        </Group>
-                        <Progress
-                          value={parseFloat(commentedPct)}
-                          size="lg"
-                          radius="xl"
-                          color="violet"
-                        />
-                      </div>
-
-                      {reviewer.dismissed > 0 && (
-                        <div>
-                          <Group justify="space-between" mb={5}>
-                            <Text size="sm" c="dimmed">
-                              Dismissed
-                            </Text>
-                            <Text size="sm" fw={600}>
-                              {reviewer.dismissed} ({dismissedPct}%)
-                            </Text>
-                          </Group>
-                          <Progress
-                            value={parseFloat(dismissedPct)}
-                            size="lg"
-                            radius="xl"
-                            color="violet"
-                          />
-                        </div>
-                      )}
-
-                      {reviewer.pending > 0 && (
-                        <div>
-                          <Group justify="space-between" mb={5}>
-                            <Text size="sm" c="dimmed">
-                              Pending
-                            </Text>
-                            <Text size="sm" fw={600}>
-                              {reviewer.pending} ({pendingPct}%)
-                            </Text>
-                          </Group>
-                          <Progress
-                            value={parseFloat(pendingPct)}
-                            size="lg"
-                            radius="xl"
-                            color="violet"
-                          />
-                        </div>
-                      )}
-                    </Stack>
-                  </Card>
-                )
-              })}
-            </Stack>
+                    return (
+                      <Table.Tr key={reviewer.name}>
+                        <Table.Td style={{ fontWeight: 600 }}>{reviewer.name}</Table.Td>
+                        <Table.Td style={{ textAlign: 'right' }}>{reviewer.totalReviews}</Table.Td>
+                        <Table.Td style={{ textAlign: 'right' }}>{reviewer.uniquePRs}</Table.Td>
+                        <Table.Td style={{ textAlign: 'right' }}>
+                          {reviewer.approved} ({approvedPct}%)
+                        </Table.Td>
+                        <Table.Td style={{ textAlign: 'right' }}>
+                          {reviewer.changesRequested} ({changesRequestedPct}%)
+                        </Table.Td>
+                        <Table.Td style={{ textAlign: 'right' }}>
+                          {reviewer.commented} ({commentedPct}%)
+                        </Table.Td>
+                        <Table.Td style={{ textAlign: 'right' }}>
+                          {reviewer.dismissed > 0 ? `${reviewer.dismissed} (${dismissedPct}%)` : '-'}
+                        </Table.Td>
+                        <Table.Td style={{ textAlign: 'right' }}>
+                          {reviewer.pending > 0 ? `${reviewer.pending} (${pendingPct}%)` : '-'}
+                        </Table.Td>
+                      </Table.Tr>
+                    )
+                  })}
+                </Table.Tbody>
+              </Table>
+            </Card>
           )}
         </Stack>
       )}
