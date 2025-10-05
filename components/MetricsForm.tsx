@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import {
   TextInput,
@@ -47,11 +47,47 @@ interface FetchMetricsParams {
   team: string
 }
 
+const STORAGE_KEY = 'pr-metrics-form'
+
 export default function MetricsForm() {
+  const [org, setOrg] = useState('')
+  const [repo, setRepo] = useState('')
+  const [team, setTeam] = useState('')
   const [numDays, setNumDays] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [error, setError] = useState('')
+
+  // Load form values from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      try {
+        const data = JSON.parse(stored)
+        if (data.org) setOrg(data.org)
+        if (data.repo) setRepo(data.repo)
+        if (data.team) setTeam(data.team)
+        if (data.numDays) setNumDays(data.numDays)
+        if (data.startDate) setStartDate(data.startDate)
+        if (data.endDate) setEndDate(data.endDate)
+      } catch (e) {
+        // Ignore invalid stored data
+      }
+    }
+  }, [])
+
+  // Save form values to localStorage whenever they change
+  useEffect(() => {
+    const data = {
+      org,
+      repo,
+      team,
+      numDays,
+      startDate,
+      endDate,
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  }, [org, repo, team, numDays, startDate, endDate])
 
   const mutation = useMutation({
     mutationFn: async (params: FetchMetricsParams) => {
@@ -108,10 +144,7 @@ export default function MetricsForm() {
     e.preventDefault()
 
     const formData = new FormData(e.currentTarget)
-    const org = (formData.get('org') as string).trim()
-    const repo = (formData.get('repo') as string).trim()
     const token = (formData.get('token') as string).trim()
-    const team = (formData.get('team') as string).trim()
 
     // Validate date inputs
     let since: Date, until: Date
@@ -128,7 +161,14 @@ export default function MetricsForm() {
       return
     }
 
-    mutation.mutate({ org, repo, token, since, until, team })
+    mutation.mutate({ 
+      org: org.trim(), 
+      repo: repo.trim(), 
+      token, 
+      since, 
+      until, 
+      team: team.trim() 
+    })
   }
 
   return (
@@ -140,6 +180,8 @@ export default function MetricsForm() {
             name="org"
             placeholder="e.g., facebook"
             required
+            value={org}
+            onChange={(e) => setOrg(e.target.value)}
             leftSection={<IconBrandGithub size={16} />}
           />
 
@@ -148,6 +190,8 @@ export default function MetricsForm() {
             name="repo"
             placeholder="e.g., react"
             required
+            value={repo}
+            onChange={(e) => setRepo(e.target.value)}
             leftSection={<IconBrandGithub size={16} />}
           />
 
@@ -200,6 +244,8 @@ export default function MetricsForm() {
             name="team"
             placeholder="e.g., frontend-team"
             description="Filter reviewers by team name. Leave empty to show all reviewers."
+            value={team}
+            onChange={(e) => setTeam(e.target.value)}
             leftSection={<IconUsers size={16} />}
           />
 
