@@ -7,5 +7,6 @@ export interface MetricsResultsProps {
   data: PRMetrics | undefined
   org: string
   repo: string
+  dateRange: [Date | null, Date | null]
 }
 

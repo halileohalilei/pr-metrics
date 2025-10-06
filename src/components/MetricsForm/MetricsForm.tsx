@@ -182,6 +182,7 @@ export function MetricsForm() {
           data={mutation.data}
           org={org}
           repo={repo}
+          dateRange={dateRange}
         />
       </div>
     </div>

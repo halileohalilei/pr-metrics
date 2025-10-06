@@ -7,3 +7,18 @@ export function formatHours(hours: number): string {
   return `${days}d ${remainingHours}h`
 }
 
+export function formatDateRange(startDate: Date | null, endDate: Date | null): string {
+  if (!startDate || !endDate) return ''
+  
+  const options: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  }
+  
+  const start = startDate.toLocaleDateString('en-US', options)
+  const end = endDate.toLocaleDateString('en-US', options)
+  
+  return `${start} - ${end}`
+}
+
